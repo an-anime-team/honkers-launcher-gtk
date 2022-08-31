@@ -48,7 +48,6 @@ pub struct Page {
     pub dxvk_folder: adw::ActionRow,
     pub prefix_folder: adw::ActionRow,
     pub game_folder: adw::ActionRow,
-    pub patch_folder: adw::ActionRow,
     pub temp_folder: adw::ActionRow,
 
     pub continue_button: gtk::Button,
@@ -67,7 +66,6 @@ impl Page {
             dxvk_folder: get_object(&builder, "dxvk_folder")?,
             prefix_folder: get_object(&builder, "prefix_folder")?,
             game_folder: get_object(&builder, "game_folder")?,
-            patch_folder: get_object(&builder, "patch_folder")?,
             temp_folder: get_object(&builder, "temp_folder")?,
 
             continue_button: get_object(&builder, "continue_button")?,
@@ -84,7 +82,6 @@ impl Page {
         result.dxvk_folder.set_subtitle(&config.game.dxvk.builds);
         result.prefix_folder.set_subtitle(&config.game.wine.prefix);
         result.game_folder.set_subtitle(&config.game.path);
-        result.patch_folder.set_subtitle(&config.patch.path);
         result.temp_folder.set_subtitle(&match config.launcher.temp {
             Some(temp) => temp,
             None => String::from("/tmp")
@@ -95,7 +92,6 @@ impl Page {
         result.connect_activated(&result.dxvk_folder);
         result.connect_activated(&result.prefix_folder);
         result.connect_activated(&result.game_folder);
-        result.connect_activated(&result.patch_folder);
         result.connect_activated(&result.temp_folder);
 
         Ok(result)
@@ -126,7 +122,6 @@ impl Page {
         config.game.dxvk.builds = self.dxvk_folder.subtitle().unwrap().to_string();
         config.game.wine.prefix = self.prefix_folder.subtitle().unwrap().to_string();
         config.game.path        = self.game_folder.subtitle().unwrap().to_string();
-        config.patch.path       = self.patch_folder.subtitle().unwrap().to_string();
         config.launcher.temp    = Some(self.temp_folder.subtitle().unwrap().to_string());
 
         config

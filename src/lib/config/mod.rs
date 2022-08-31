@@ -15,14 +15,11 @@ use super::wine::{
 
 pub mod launcher;
 pub mod game;
-pub mod patch;
 pub mod resolution;
 
 pub mod prelude {
     pub use super::launcher::prelude::*;
     pub use super::game::prelude::*;
-
-    pub use super::patch::Patch;
     pub use super::resolution::Resolution;
 }
 
@@ -127,8 +124,7 @@ pub fn flush() -> Result<(), Error> {
 #[derive(Debug, Clone, Serialize, Deserialize, Default)]
 pub struct Config {
     pub launcher: Launcher,
-    pub game: Game,
-    pub patch: Patch
+    pub game: Game
 }
 
 impl Config {
@@ -181,11 +177,6 @@ impl From<&JsonValue> for Config {
             game: match value.get("game") {
                 Some(value) => Game::from(value),
                 None => default.game
-            },
-
-            patch: match value.get("patch") {
-                Some(value) => Patch::from(value),
-                None => default.patch
             }
         }
     }
