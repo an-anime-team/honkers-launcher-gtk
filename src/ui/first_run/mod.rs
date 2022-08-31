@@ -172,10 +172,22 @@ impl App {
             // Some debug output
             println!("[update] action: {:?}", &action);
 
+            const REQUIRED_PACKAGES: &[&str] = &["git", "xdelta3", "7z"];
+
             match action {
                 Actions::WelcomeContinue => {
                     this.widgets.carousel.scroll_to({
-                        if lib::is_available("git") && lib::is_available("xdelta3") {
+                        let mut installed = true;
+
+                        for package in REQUIRED_PACKAGES {
+                            if !lib::is_available(package) {
+                                installed = false;
+
+                                break;
+                            }
+                        }
+
+                        if installed {
                             &this.widgets.tos_warning.page
                         } else {
                             &this.widgets.dependencies.page
@@ -192,7 +204,7 @@ impl App {
                 Actions::DependenciesContinue => {
                     let mut installed = true;
 
-                    for package in ["git", "xdelta3"] {
+                    for package in REQUIRED_PACKAGES {
                         if !lib::is_available(package) {
                             installed = false;
 

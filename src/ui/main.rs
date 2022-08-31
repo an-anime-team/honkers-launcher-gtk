@@ -332,7 +332,7 @@ impl App {
 
                                                 match Command::new("ps").arg("-A").stdout(Stdio::piped()).output() {
                                                     Ok(output) => {
-                                                        if !String::from_utf8_lossy(&output.stdout).contains("GenshinImpact.e") {
+                                                        if !String::from_utf8_lossy(&output.stdout).contains("BH3.exe") {
                                                             break;
                                                         }
                                                     },

@@ -100,7 +100,7 @@ pub fn run(debug: bool) -> std::io::Result<()> {
     if debug {
         todo!();
     } else {
-        bash_chain += "launcher.bat ";
+        bash_chain += "BH3.exe ";
     }
 
     if config.game.wine.borderless {
