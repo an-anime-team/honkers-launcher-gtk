@@ -12,7 +12,7 @@ lazy_static! {
     static ref GROUPS: Vec<Group> = vec![
         Group {
             title: String::from("Honks"),
-            subtitle: None,
+            subtitle: Some(String::from("Special builds made from the HEAD of DXVK repository")),
             versions: vec![
                 Version {
                     name: String::from("dxvk-honk-1.9.4"),
