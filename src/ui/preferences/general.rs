@@ -293,8 +293,10 @@ impl App {
                     app.update(super::main::Actions::RepairGame).unwrap();
                 }
 
-                Actions::DxvkPerformAction(i) => {
-                    let component = this.widgets.dxvk_components[*i].clone();
+                Actions::DxvkPerformAction(version) => {
+                    let component = this.widgets
+                        .dxvk_components[version.0]
+                        .version_components[version.1].clone();
 
                     if component.is_downloaded(&config.game.dxvk.builds) {
                         if let Err(err) = component.delete(&config.game.dxvk.builds) {
