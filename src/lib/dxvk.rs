@@ -11,14 +11,16 @@ use crate::lib::config;
 lazy_static! {
     static ref GROUPS: Vec<Group> = vec![
         Group {
-            title: String::from("Vanilla"),
+            title: String::from("Honks"),
             subtitle: None,
-            versions: serde_json::from_str(include_str!("../../components/dxvk/vanilla.json")).unwrap()
-        },
-        Group {
-            title: String::from("Async"),
-            subtitle: Some(String::from("This version is not recommended for usage as can lead to anti-cheat detection. Automatically uses DXVK_ASYNC=1")),
-            versions: serde_json::from_str(include_str!("../../components/dxvk/async.json")).unwrap()
+            versions: vec![
+                Version {
+                    name: String::from("dxvk-honk-1.9.4"),
+                    version: String::from("1.9.4-honk"),
+                    uri: String::from("https://github.com/an-anime-team/honkers-launcher/raw/main/repository/dxvk-honk-1.9.4.zip"),
+                    recommended: true
+                }
+            ]
         }
     ];
 }
