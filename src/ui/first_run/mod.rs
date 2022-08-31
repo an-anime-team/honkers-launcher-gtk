@@ -172,7 +172,7 @@ impl App {
             // Some debug output
             println!("[update] action: {:?}", &action);
 
-            const REQUIRED_PACKAGES: &[&str] = &["git", "xdelta3", "7z"];
+            const REQUIRED_PACKAGES: &[&str] = &["git", "xdelta3", "7z", "ntlm_auth"];
 
             match action {
                 Actions::WelcomeContinue => {
