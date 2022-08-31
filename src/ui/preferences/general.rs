@@ -16,7 +16,6 @@ use crate::lib::wine;
 
 use crate::ui::*;
 use crate::ui::traits::prelude::*;
-use crate::ui::components::dxvk_row::DxvkRow;
 use crate::ui::components::wine_group::WineGroup;
 use crate::ui::components::dxvk_group::DxvkGroup;
 
