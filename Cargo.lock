@@ -51,22 +51,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "anime-game-launcher"
-version = "1.0.3"
-dependencies = [
- "anime-game-core",
- "anyhow",
- "dirs",
- "gtk4",
- "lazy_static",
- "libadwaita",
- "regex",
- "serde",
- "serde_json",
- "wait_not_await",
-]
-
-[[package]]
 name = "anyhow"
 version = "1.0.58"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -860,6 +844,22 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "6c49c37c09c17a53d937dfbb742eb3a961d65a994e6bcdcf37e7399d0cc8ab5e"
 dependencies = [
  "digest",
+]
+
+[[package]]
+name = "honkers-launcher"
+version = "0.1.0"
+dependencies = [
+ "anime-game-core",
+ "anyhow",
+ "dirs",
+ "gtk4",
+ "lazy_static",
+ "libadwaita",
+ "regex",
+ "serde",
+ "serde_json",
+ "wait_not_await",
 ]
 
 [[package]]

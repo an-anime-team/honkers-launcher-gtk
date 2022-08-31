@@ -3,24 +3,14 @@ use serde::{Serialize, Deserialize};
 lazy_static::lazy_static! {
     static ref GROUPS: Vec<Group> = vec![
         Group {
-            title: String::from("Wine-GE-Proton"),
+            title: String::from("Wine-Staging-TkG"),
             subtitle: None,
-            versions: serde_json::from_str(include_str!("../../components/wine/wine-ge-proton.json")).unwrap()
+            versions: serde_json::from_str(include_str!("../../components/wine/wine-staging-tkg.json")).unwrap()
         },
         Group {
-            title: String::from("GE-Proton"),
-            subtitle: Some(String::from("This version includes its own DXVK builds and you can use DXVK_ASYNC variable")),
-            versions: serde_json::from_str(include_str!("../../components/wine/ge-proton.json")).unwrap()
-        },
-        Group {
-            title: String::from("Soda"),
-            subtitle: Some(String::from("New runner based on Valve’s Wine, with patches from Proton, TKG and GE. Developed by Bottles")),
-            versions: serde_json::from_str(include_str!("../../components/wine/soda.json")).unwrap()
-        },
-        Group {
-            title: String::from("Lutris"),
+            title: String::from("Wine-Staging"),
             subtitle: None,
-            versions: serde_json::from_str(include_str!("../../components/wine/lutris.json")).unwrap()
+            versions: serde_json::from_str(include_str!("../../components/wine/wine-staging.json")).unwrap()
         }
     ];
 }

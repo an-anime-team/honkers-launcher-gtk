@@ -22,7 +22,6 @@ use prelude::*;
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Game {
     pub path: String,
-    pub voices: Vec<String>,
     pub wine: prelude::Wine,
     pub dxvk: prelude::Dxvk,
     pub enhancements: prelude::Enhancements,
@@ -35,10 +34,7 @@ impl Default for Game {
         let launcher_dir = launcher_dir().expect("Failed to get launcher dir");
 
         Self {
-            path: format!("{launcher_dir}/game/drive_c/Program Files/Genshin Impact"),
-            voices: vec![
-                String::from("en-us")
-            ],
+            path: format!("{launcher_dir}/game/drive_c/Program Files/Honkai Impact"),
             wine: Wine::default(),
             dxvk: Dxvk::default(),
             enhancements: Enhancements::default(),
@@ -56,24 +52,6 @@ impl From<&JsonValue> for Game {
             path: match value.get("path") {
                 Some(value) => value.as_str().unwrap_or(&default.path).to_string(),
                 None => default.path
-            },
-
-            voices: match value.get("voices") {
-                Some(value) => match value.as_array() {
-                    Some(values) => {
-                        let mut voices = Vec::new();
-
-                        for value in values {
-                            if let Some(voice) = value.as_str() {
-                                voices.push(voice.to_string());
-                            }
-                        }
-
-                        voices
-                    },
-                    None => default.voices
-                },
-                None => default.voices
             },
 
             wine: match value.get("wine") {

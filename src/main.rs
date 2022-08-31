@@ -14,7 +14,7 @@ pub mod lib;
 
 use ui::*;
 
-pub const APP_ID: &str = "moe.launcher.an-anime-game-launcher-gtk";
+pub const APP_ID: &str = "moe.launcher.honkers-launcher-gtk";
 pub const APP_VERSION: &str = env!("CARGO_PKG_VERSION");
 pub const APP_DEBUG: bool = cfg!(debug_assertions);
 
@@ -27,8 +27,8 @@ fn main() {
         .expect("Failed to register resources");
 
     // Set application's title
-    glib::set_application_name("An Anime Game Launcher");
-    glib::set_program_name(Some("An Anime Game Launcher"));
+    glib::set_application_name("Honkers Launcher");
+    glib::set_program_name(Some("Honkers Launcher"));
 
     // Create app
     let application = gtk::Application::new(
@@ -94,9 +94,6 @@ fn main() {
                 fs::create_dir_all(config.game.dxvk.builds)
                     .expect("Failed to create DXVK builds directory");
             }
-
-            // Set game edition
-            anime_game_core::genshin::consts::set_game_edition(config.launcher.edition.into());
 
             // Load main window
             let main = MainApp::new(app).expect("Failed to init MainApp");

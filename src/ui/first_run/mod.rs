@@ -14,7 +14,6 @@ mod welcome;
 mod dependencies;
 mod tos_warning;
 mod default_paths;
-mod voice_packages;
 mod download_components;
 mod finish;
 
@@ -41,7 +40,6 @@ pub struct AppWidgets {
     pub dependencies: dependencies::Page,
     pub tos_warning: tos_warning::Page,
     pub default_paths: default_paths::Page,
-    pub voice_packages: voice_packages::Page,
     pub download_components: download_components::Page,
     pub finish: finish::Page
 }
@@ -59,7 +57,6 @@ impl AppWidgets {
             dependencies: dependencies::Page::new()?,
             tos_warning: tos_warning::Page::new()?,
             default_paths: default_paths::Page::new(get_object(&builder, "window")?)?,
-            voice_packages: voice_packages::Page::new()?,
             download_components: download_components::Page::new()?,
             finish: finish::Page::new()?
         };
@@ -69,7 +66,6 @@ impl AppWidgets {
         result.carousel.append(&result.dependencies.page);
         result.carousel.append(&result.tos_warning.page);
         result.carousel.append(&result.default_paths.page);
-        result.carousel.append(&result.voice_packages.page);
         result.carousel.append(&result.download_components.page);
         result.carousel.append(&result.finish.page);
 
@@ -94,7 +90,6 @@ pub enum Actions {
     DependenciesContinue,
     TosWarningContinue,
     DefaultPathsContinue,
-    VoicePackagesContinue,
     DownloadComponents,
     DownloadComponentsContinue,
     Restart,
@@ -150,7 +145,6 @@ impl App {
         self.widgets.tos_warning.continue_button.connect_clicked(Actions::TosWarningContinue.into_fn(&self));
         self.widgets.default_paths.continue_button.connect_clicked(Actions::DefaultPathsContinue.into_fn(&self));
         self.widgets.dependencies.check_button.connect_clicked(Actions::DependenciesContinue.into_fn(&self));
-        self.widgets.voice_packages.continue_button.connect_clicked(Actions::VoicePackagesContinue.into_fn(&self));
 
         self.widgets.welcome.advanced_button.connect_clicked(Actions::WelcomeAdvanced.into_fn(&self));
         self.widgets.download_components.download_button.connect_clicked(Actions::DownloadComponents.into_fn(&self));
@@ -158,7 +152,6 @@ impl App {
         self.widgets.dependencies.exit_button.connect_clicked(Actions::Exit.into_fn(&self));
         self.widgets.tos_warning.exit_button.connect_clicked(Actions::Exit.into_fn(&self));
         self.widgets.default_paths.exit_button.connect_clicked(Actions::Exit.into_fn(&self));
-        self.widgets.voice_packages.exit_button.connect_clicked(Actions::Exit.into_fn(&self));
         self.widgets.download_components.exit_button.connect_clicked(Actions::Exit.into_fn(&self));
         self.widgets.finish.exit_button.connect_clicked(Actions::Exit.into_fn(&self));
 
@@ -219,19 +212,13 @@ impl App {
                         if this.advanced.get() {
                             &this.widgets.default_paths.page
                         } else {
-                            &this.widgets.voice_packages.page
+                            &this.widgets.download_components.page
                         }
                     }, true);
                 }
 
                 Actions::DefaultPathsContinue => {
                     config::update_raw(this.widgets.default_paths.update_config(config::get().unwrap())).unwrap();
-
-                    this.widgets.carousel.scroll_to(&this.widgets.voice_packages.page, true);
-                }
-
-                Actions::VoicePackagesContinue => {
-                    config::update_raw(this.widgets.voice_packages.update_config(config::get().unwrap())).unwrap();
 
                     this.widgets.carousel.scroll_to(&this.widgets.download_components.page, true);
                 }

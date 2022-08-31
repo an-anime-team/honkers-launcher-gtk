@@ -13,7 +13,6 @@
     <file preprocess="xml-stripblanks" compressed="true" alias="dependencies.ui">ui/.dist/first_run/dependencies.ui</file>
     <file preprocess="xml-stripblanks" compressed="true" alias="tos_warning.ui">ui/.dist/first_run/tos_warning.ui</file>
     <file preprocess="xml-stripblanks" compressed="true" alias="default_paths.ui">ui/.dist/first_run/default_paths.ui</file>
-    <file preprocess="xml-stripblanks" compressed="true" alias="voice_packages.ui">ui/.dist/first_run/voice_packages.ui</file>
     <file preprocess="xml-stripblanks" compressed="true" alias="download_components.ui">ui/.dist/first_run/download_components.ui</file>
     <file preprocess="xml-stripblanks" compressed="true" alias="finish.ui">ui/.dist/first_run/finish.ui</file>
   </gresource>

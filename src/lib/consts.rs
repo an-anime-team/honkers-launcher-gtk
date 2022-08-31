@@ -15,7 +15,7 @@ pub fn launcher_dir() -> Option<String> {
             Some(value) => value.clone(),
             None => {
                 let value = match dirs::data_dir() {
-                    Some(dir) => Some(format!("{}/anime-game-launcher", dir.to_string_lossy())),
+                    Some(dir) => Some(format!("{}/honkers-launcher", dir.to_string_lossy())),
                     None => None
                 };
 

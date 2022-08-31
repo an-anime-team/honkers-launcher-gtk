@@ -8,17 +8,14 @@ use std::rc::Rc;
 use std::cell::Cell;
 
 use anime_game_core::prelude::*;
-use anime_game_core::genshin::prelude::*;
+use anime_game_core::honkai::prelude::*;
 
-use crate::lib::consts;
 use crate::lib::config;
 use crate::lib::dxvk;
 use crate::lib::wine;
-use crate::lib::launcher::states::LauncherState;
 
 use crate::ui::*;
 use crate::ui::traits::prelude::*;
-use crate::ui::components::voiceover_row::VoiceoverRow;
 use crate::ui::components::dxvk_row::DxvkRow;
 use crate::ui::components::wine_group::WineGroup;
 
@@ -31,13 +28,9 @@ use crate::ui::components::wine_group::WineGroup;
 pub struct AppWidgets {
     pub page: adw::PreferencesPage,
 
-    pub voiceovers_row: adw::ExpanderRow,
-    pub voieover_components: Rc<Vec<VoiceoverRow>>,
-
     pub repair_game: gtk::Button,
 
     pub game_version: gtk::Label,
-    pub patch_version: gtk::Label,
 
     pub wine_selected: adw::ComboRow,
 
@@ -62,13 +55,9 @@ impl AppWidgets {
         let mut result = Self {
             page: get_object(&builder, "page")?,
 
-            voiceovers_row: get_object(&builder, "voiceovers_row")?,
-            voieover_components: Default::default(),
-
             repair_game: get_object(&builder, "repair_game")?,
 
             game_version: get_object(&builder, "game_version")?,
-            patch_version: get_object(&builder, "patch_version")?,
 
             wine_selected: get_object(&builder, "wine_selected")?,
 
@@ -90,24 +79,6 @@ impl AppWidgets {
             Ok(config) => config,
             Err(err) => return Err(err.to_string())
         };
-
-        // Update voiceovers list
-        let voice_packages = match VoicePackage::list_latest() {
-            Ok(voice_packages) => voice_packages,
-            Err(err) => return Err(err.to_string())
-        };
-
-        let mut components = Vec::new();
-
-        for package in voice_packages {
-            let row = VoiceoverRow::new(package);
-
-            result.voiceovers_row.add_row(&row.row);
-
-            components.push(row);
-        }
-
-        result.voieover_components = Rc::new(components);
 
         // Update wine versions lists
         let mut components = Vec::new();
@@ -157,7 +128,6 @@ impl AppWidgets {
 #[derive(Debug, Clone, glib::Downgrade)]
 pub enum Actions {
     RepairGame,
-    VoiceoverPerformAction(Rc<usize>),
     DxvkPerformAction(Rc<usize>),
     WinePerformAction(Rc<(usize, usize)>),
     UpdateDxvkComboRow,
@@ -225,13 +195,6 @@ impl App {
     /// Add default events and values to the widgets
     fn init_events(self) -> Self {
         self.widgets.repair_game.connect_clicked(Actions::RepairGame.into_fn(&self));
-
-        // Voiceover download/delete button event
-        for (i, row) in (&*self.widgets.voieover_components).into_iter().enumerate() {
-            row.button.connect_clicked(clone!(@weak self as this => move |_| {
-                this.update(Actions::VoiceoverPerformAction(Rc::new(i))).unwrap();
-            }));
-        }
 
         // Selecting wine version event
         self.widgets.wine_selected.connect_selected_notify(clone!(@weak self as this => move |combo_row| {
@@ -333,48 +296,6 @@ impl App {
 
                     app.update(super::main::Actions::PreferencesGoBack).unwrap();
                     app.update(super::main::Actions::RepairGame).unwrap();
-                }
-
-                Actions::VoiceoverPerformAction(i) => {
-                    let component = this.widgets.voieover_components[*i].clone();
-
-                    if component.is_downloaded(&config.game.path) {
-                        component.button.set_sensitive(false);
-
-                        let this = this.clone();
-
-                        std::thread::spawn(move || {
-                            if let Err(err) = component.package.delete_in(&config.game.path) {
-                                this.update(Actions::Toast(Rc::new((
-                                    String::from("Failed to delete voiceover"), err.to_string()
-                                )))).unwrap();
-                            }
-
-                            component.button.set_sensitive(true);
-
-                            component.update_state(&config.game.path);
-                        });
-                    }
-
-                    else {
-                        let option = (&*this.app).take();
-                        this.app.set(option.clone());
-
-                        let app = option.unwrap();
-
-                        // Add voiceover to config
-                        config.game.voices.push(component.package.locale().to_code().to_string());
-
-                        config::update(config);
-
-                        // Return back, update state and press "download" button if needed
-                        app.update(super::main::Actions::PreferencesGoBack).unwrap();
-                        app.update_state().then(move |state| {
-                            if let Ok(LauncherState::VoiceNotInstalled(_)) = state {
-                                app.update(super::main::Actions::PerformButtonEvent).unwrap();
-                            }
-                        });
-                    }
                 }
 
                 Actions::DxvkPerformAction(i) => {
@@ -601,18 +522,10 @@ impl App {
         let config = config::get()?;
         let game = Game::new(&config.game.path);
 
-        // Update voiceovers states
-        status_page.set_description(Some("Updating voiceovers info..."));
-
-        for package in &*self.widgets.voieover_components {
-            package.update_state(&config.game.path);
-        }
-
         // Update game version
         status_page.set_description(Some("Updating game info..."));
 
         self.widgets.game_version.set_tooltip_text(None);
-        self.widgets.patch_version.set_tooltip_text(None);
 
         match game.try_get_diff()? {
             VersionDiff::Latest(version) => {
@@ -633,50 +546,6 @@ impl App {
             VersionDiff::NotInstalled { .. } => {
                 self.widgets.game_version.set_label("not installed");
                 self.widgets.game_version.set_css_classes(&[]);
-            }
-        }
-
-        // Update patch version
-        status_page.set_description(Some("Updating patch info..."));
-
-        let patch = Patch::try_fetch(config.patch.servers, consts::PATCH_FETCHING_TIMEOUT)?;
-
-        match patch {
-            Patch::NotAvailable => {
-                self.widgets.patch_version.set_label("not available");
-                self.widgets.patch_version.set_css_classes(&["error"]);
-
-                self.widgets.patch_version.set_tooltip_text(Some("Patch is not available"));
-            },
-            Patch::Outdated { current, latest, .. } => {
-                self.widgets.patch_version.set_label("outdated");
-                self.widgets.patch_version.set_css_classes(&["warning"]);
-
-                self.widgets.patch_version.set_tooltip_text(Some(&format!("Patch is outdated ({current} -> {latest})")));
-            },
-            Patch::Preparation { .. } => {
-                self.widgets.patch_version.set_label("preparation");
-                self.widgets.patch_version.set_css_classes(&["warning"]);
-
-                self.widgets.patch_version.set_tooltip_text(Some("Patch is in preparation state and will be available later"));
-            },
-            Patch::Testing { version, .. } => {
-                self.widgets.patch_version.set_label(&version.to_string());
-                self.widgets.patch_version.set_css_classes(&["warning"]);
-
-                self.widgets.patch_version.set_tooltip_text(Some("Patch is in testing phase"));
-            },
-            Patch::Available { version, .. } => {
-                self.widgets.patch_version.set_label(&version.to_string());
-                
-                if let Ok(true) = patch.is_applied(&config.game.path) {
-                    self.widgets.patch_version.set_css_classes(&["success"]);
-                }
-
-                else {
-                    self.widgets.patch_version.set_css_classes(&["warning"]);
-                    self.widgets.patch_version.set_tooltip_text(Some("Patch is not applied"));
-                }
             }
         }
 

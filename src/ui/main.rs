@@ -12,7 +12,7 @@ use std::process::{Command, Stdio};
 use wait_not_await::Await;
 
 use anime_game_core::prelude::*;
-use anime_game_core::genshin::prelude::*;
+use anime_game_core::honkai::prelude::*;
 
 use crate::ui::*;
 
@@ -309,7 +309,6 @@ impl App {
                     match config::get() {
                         Ok(mut config) => {
                             match state {
-                                LauncherState::PatchAvailable(Patch::NotAvailable) |
                                 LauncherState::Launch => {
                                     let this = this.clone();
 
@@ -344,73 +343,6 @@ impl App {
                                             this.widgets.window.show();
                                         }
                                     });
-                                },
-
-                                LauncherState::PatchAvailable(patch) => {
-                                    match patch {
-                                        Patch::NotAvailable |
-                                        Patch::Outdated { .. } |
-                                        Patch::Preparation { .. } => unreachable!(),
-
-                                        Patch::Testing { version, host, .. } |
-                                        Patch::Available { version, host, .. } => {
-                                            this.widgets.launch_game.set_sensitive(false);
-                                            this.widgets.open_preferences.set_sensitive(false);
-
-                                            let this = this.clone();
-
-                                            std::thread::spawn(move || {
-                                                let applier = PatchApplier::new(&config.patch.path);
-
-                                                let mut synced = false;
-
-                                                match applier.is_sync_with(&host) {
-                                                    Ok(true) => synced = true,
-
-                                                    Ok(false) => {
-                                                        match applier.sync(host) {
-                                                            Ok(true) => synced = true,
-
-                                                            Ok(false) => {
-                                                                this.update(Actions::Toast(Rc::new((
-                                                                    String::from("Failed to sync patch folder"), Error::last_os_error().to_string()
-                                                                )))).unwrap();
-                                                            }
-
-                                                            Err(err) => {
-                                                                this.update(Actions::Toast(Rc::new((
-                                                                    String::from("Failed to sync patch folder"), err.to_string()
-                                                                )))).unwrap();
-                                                            }
-                                                        }
-                                                    }
-
-                                                    Err(err) => this.update(Actions::Toast(Rc::new((
-                                                        String::from("Failed to check patch folder state"), err.to_string()
-                                                    )))).unwrap()
-                                                }
-
-                                                if synced {
-                                                    match applier.apply(&config.game.path, version, config.patch.root) {
-                                                        Ok(_) => (),
-
-                                                        Err(err) => {
-                                                            this.update(Actions::Toast(Rc::new((
-                                                                String::from("Failed to patch game"), err.to_string()
-                                                            )))).unwrap();
-                                                        }
-                                                    }
-                                                }
-
-                                                glib::MainContext::default().invoke(move || {
-                                                    this.widgets.launch_game.set_sensitive(true);
-                                                    this.widgets.open_preferences.set_sensitive(true);
-
-                                                    this.update_state();
-                                                });
-                                            });
-                                        }
-                                    }
                                 }
 
                                 LauncherState::WineNotInstalled => {
@@ -591,18 +523,7 @@ impl App {
 
                             std::thread::spawn(move || {
                                 match repairer::try_get_integrity_files(None) {
-                                    Ok(mut files) => {
-                                        // Add voiceovers files
-                                        let game = Game::new(&config.game.path);
-
-                                        if let Ok(voiceovers) = game.get_voice_packages() {
-                                            for package in voiceovers {
-                                                if let Ok(mut voiceover_files) = repairer::try_get_voice_integrity_files(package.locale(), None) {
-                                                    files.append(&mut voiceover_files);
-                                                }
-                                            }
-                                        }
-
+                                    Ok(files) => {
                                         this.update(Actions::ShowProgressBar).unwrap();
 
                                         this.update(Actions::UpdateProgress {
@@ -692,13 +613,6 @@ impl App {
 
                                             let total = broken.len() as f64;
 
-                                            let is_patch_applied = match Patch::try_fetch(config.patch.servers, consts::PATCH_FETCHING_TIMEOUT) {
-                                                Ok(patch) => patch.is_applied(&config.game.path).unwrap_or(true),
-                                                Err(_) => true
-                                            };
-
-                                            println!("Patch status: {}", is_patch_applied);
-
                                             fn should_ignore(path: &str) -> bool {
                                                 for part in ["UnityPlayer.dll", "xlua.dll", "crashreport.exe", "upload_crash.exe", "vulkan-1.dll"] {
                                                     if path.contains(part) {
@@ -710,7 +624,7 @@ impl App {
                                             }
 
                                             for (i, file) in broken.into_iter().enumerate() {
-                                                if !is_patch_applied || !should_ignore(&file.path) {
+                                                if !should_ignore(&file.path) {
                                                     if let Err(err) = file.repair(&config.game.path) {
                                                         let err: Error = err.into();
 
@@ -806,41 +720,6 @@ impl App {
         match &state {
             LauncherState::Launch => {
                 self.widgets.launch_game.set_label("Launch");
-            }
-
-            LauncherState::PatchAvailable(patch) => {
-                match patch {
-                    Patch::NotAvailable => {
-                        self.widgets.launch_game.set_label("Patch not available");
-
-                        self.widgets.launch_game.set_tooltip_text(Some("Patch servers are unavailable and launcher can't verify the game's patching status. You're allowed to run the game on your own risk"));
-
-                        self.widgets.launch_game.remove_css_class("suggested-action");
-                        self.widgets.launch_game.add_css_class("destructive-action");
-                    }
-
-                    Patch::Outdated { .. } |
-                    Patch::Preparation { .. } => {
-                        self.widgets.launch_game.set_label("Patch not available");
-                        self.widgets.launch_game.set_sensitive(false);
-
-                        self.widgets.launch_game.set_tooltip_text(Some("Patch is outdated or in preparation state, so unavailable for usage. Return back later to see its status"));
-
-                        self.widgets.launch_game.remove_css_class("suggested-action");
-                        self.widgets.launch_game.add_css_class("destructive-action");
-                    }
-
-                    Patch::Testing { .. } => {
-                        self.widgets.launch_game.set_label("Apply test patch");
-
-                        self.widgets.launch_game.remove_css_class("suggested-action");
-                        self.widgets.launch_game.add_css_class("warning");
-                    }
-
-                    Patch::Available { .. } => {
-                        self.widgets.launch_game.set_label("Apply patch");
-                    }
-                }
             }
 
             LauncherState::WineNotInstalled => {

@@ -2,7 +2,7 @@ use std::io::{Error, ErrorKind};
 use std::path::Path;
 use std::process::Command;
 
-use anime_game_core::genshin::telemetry;
+use anime_game_core::honkai::telemetry;
 
 use super::consts;
 use super::config;
@@ -78,6 +78,7 @@ pub fn run(debug: bool) -> std::io::Result<()> {
 
     // Check telemetry servers
 
+    // TODO
     if let Some(server) = telemetry::is_disabled(consts::TELEMETRY_CHECK_TIMEOUT) {
         return Err(Error::new(ErrorKind::Other, format!("Telemetry server is not disabled: {server}")));
     }

@@ -22,11 +22,6 @@ Adw.PreferencesPage page {
             tooltip-text: "Work in progress";
         }
 
-        Adw.ExpanderRow voiceovers_row {
-            title: "Game voiceovers";
-            subtitle: "Select voice packages used in game";
-        }
-
         Gtk.Box {
             orientation: horizontal;
             spacing: 8;
@@ -48,36 +43,6 @@ Adw.PreferencesPage page {
                 label: "2.7.0";
 
                 styles ["success"]
-            }
-        }
-
-        Adw.ActionRow {
-            title: "Patch version";
-
-            Gtk.Label patch_version {
-                label: "2.7.0";
-
-                styles ["success"]
-            }
-        }
-
-        Gtk.Box {
-            orientation: horizontal;
-            spacing: 8;
-            margin-top: 16;
-
-            Gtk.Button {
-                label: "Revert patch";
-
-                sensitive: false;
-                tooltip-text: "Work in progress";
-            }
-
-            Gtk.Button {
-                label: "Re-apply patch";
-
-                sensitive: false;
-                tooltip-text: "Work in progress";
             }
         }
     }

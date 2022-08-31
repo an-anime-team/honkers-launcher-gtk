@@ -1,7 +1,7 @@
 [package]
-name = "anime-game-launcher"
-version = "1.0.3"
-description = "Anime Game launcher"
+name = "honkers-launcher"
+version = "0.1.0"
+description = "Honkers launcher"
 authors = ["Nikita Podvirnyy <suimin.tu.mu.ga.mi@gmail.com>"]
 license = "GPL-3.0"
 edition = "2021"
@@ -19,7 +19,7 @@ gtk4 = "0.4"
 gtk4 = "0.4"
 libadwaita = "0.1"
 
-anime-game-core = { path = "anime-game-core", features = ["all", "static", "genshin"] }
+anime-game-core = { path = "anime-game-core", features = ["all", "static", "honkai"] }
 
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
