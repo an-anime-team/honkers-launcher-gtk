@@ -1,8 +1,3 @@
-# Honkers Launcher GTK
-
-The launcher variant written on Rust, GTK4 and libadwaita, using [Anime Game Core](https://github.com/an-anime-team/anime-game-core) library
-
-<img src="https://github.com/an-anime-team/an-anime-game-launcher/raw/main/repository/pics/logo.jpg">
 <img src="repository/pictures/main.png">
 <img src="repository/pictures/settings.png">
 
@@ -11,6 +6,10 @@ The launcher variant written on Rust, GTK4 and libadwaita, using [Anime Game Cor
 <p align="center">You could also try <a href="https://github.com/an-anime-team/honkers-launcher">the main branch</a></p>
 
 <br>
+
+<h2 align="center">In early development state. Not considered as usable</h2>
+
+<br><br>
 
 # Development
 
