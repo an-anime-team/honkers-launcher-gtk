@@ -212,7 +212,7 @@ impl App {
 
     /// Add default events and values to the widgets
     fn init_events(self) -> Self {
-        // Add menu actions
+        // Open actions
         add_action(&self.widgets.menu, "open-launcher-folder", clone!(@weak self as this => move || {
             if let Some(launcher_dir) = consts::launcher_dir() {
                 if let Err(err) = Command::new("xdg-open").arg(launcher_dir).spawn() {

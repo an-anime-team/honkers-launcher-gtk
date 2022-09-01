@@ -11,13 +11,13 @@ use crate::lib::config;
 lazy_static! {
     static ref GROUPS: Vec<Group> = vec![
         Group {
-            title: String::from("Honks"),
+            title: String::from("Honk"),
             subtitle: Some(String::from("Special builds made from the HEAD of DXVK repository")),
             versions: vec![
                 Version {
-                    name: String::from("dxvk-honk-1.9.4"),
-                    version: String::from("1.9.4-honk"),
-                    uri: String::from("https://github.com/an-anime-team/honkers-launcher/raw/main/repository/dxvk-honk-1.9.4.zip"),
+                    name: String::from("dxvk-1.10.1-honk-1"),
+                    version: String::from("1.10.1-honk-1"),
+                    uri: String::from("https://github.com/an-anime-team/honkers-launcher-gtk/raw/main/repository/dxvk-honk-builds/dxvk-1.10.1-honk-1.tar.xz"),
                     recommended: true
                 }
             ]
