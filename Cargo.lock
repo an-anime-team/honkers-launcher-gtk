@@ -848,7 +848,7 @@ dependencies = [
 
 [[package]]
 name = "honkers-launcher"
-version = "0.1.1"
+version = "1.0.0"
 dependencies = [
  "anime-game-core",
  "anyhow",

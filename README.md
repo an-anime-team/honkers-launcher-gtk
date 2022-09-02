@@ -7,10 +7,6 @@
 
 <br>
 
-<h2 align="center">In early development state. Not considered as usable</h2>
-
-<br><br>
-
 # Development
 
 | Folder | Description |
