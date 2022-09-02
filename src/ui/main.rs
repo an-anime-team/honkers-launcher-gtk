@@ -29,6 +29,7 @@ use crate::lib::wine::{
     List as WineList
 };
 use crate::lib::wine_prefix::WinePrefix;
+use crate::lib::media_foundation::install_media_foundation;
 
 /// This structure is used to describe widgets used in application
 /// 
@@ -390,8 +391,6 @@ impl App {
                                                                             config.game.wine.selected = Some(wine.name.clone());
 
                                                                             config::update(config);
-
-                                                                            this.update_state();
                                                                         }
                                                                     }
 
@@ -430,10 +429,27 @@ impl App {
                                             std::thread::spawn(move || {
                                                 this.widgets.launch_game.set_sensitive(false);
 
-                                                if let Err(err) = prefix.update(&config.game.wine.builds, wine) {
-                                                    this.update(Actions::Toast(Rc::new((
-                                                        String::from("Failed to create wine prefix"), err.to_string()
-                                                    )))).unwrap();
+                                                match prefix.update(&config.game.wine.builds, wine) {
+                                                    Ok(_) => {
+                                                        // Apply media foundation patch
+                                                        match install_media_foundation(
+                                                            &config.game.wine.builds,
+                                                            config.try_get_selected_wine_info().unwrap(),
+                                                            &config.game.wine.prefix
+                                                        ) {
+                                                            Ok(output) => println!("Media foundation patch applied:\n\n{}", String::from_utf8_lossy(&output.stdout)),
+                                                            Err(err) => {
+                                                                this.update(Actions::Toast(Rc::new((
+                                                                    String::from("Failed to apply media foundation patch"), err.to_string()
+                                                                )))).unwrap();
+                                                            }
+                                                        }
+                                                    },
+                                                    Err(err) => {
+                                                        this.update(Actions::Toast(Rc::new((
+                                                            String::from("Failed to create wine prefix"), err.to_string()
+                                                        )))).unwrap();
+                                                    }
                                                 }
 
                                                 this.widgets.launch_game.set_sensitive(true);
@@ -759,35 +775,38 @@ impl App {
         self.widgets.status_page.show();
         self.widgets.launcher_content.hide();
 
-        let (sender, receiver) = glib::MainContext::channel::<String>(glib::PRIORITY_DEFAULT);
         let (send, recv) = std::sync::mpsc::channel();
-
-        receiver.attach(None, clone!(@strong self.widgets.status_page as status_page => move |description| {
-            status_page.set_description(Some(&description));
-
-            glib::Continue(true)
-        }));
 
         let this = self.clone();
 
-        std::thread::spawn(move || {
-            match LauncherState::get(move |status| sender.send(status.to_string()).unwrap()) {
-                Ok(state) => {
-                    this.set_state(state.clone());
+        glib::MainContext::default().invoke(move || {
+            let (sender, receiver) = glib::MainContext::channel::<String>(glib::PRIORITY_DEFAULT);
 
-                    this.widgets.status_page.hide();
-                    this.widgets.launcher_content.show();
+            receiver.attach(None, clone!(@strong this.widgets.status_page as status_page => move |description| {
+                status_page.set_description(Some(&description));
 
-                    send.send(Ok(state)).unwrap();
-                },
-                Err(err) => {
-                    send.send(Err(err.to_string())).unwrap();
+                glib::Continue(true)
+            }));
 
-                    glib::MainContext::default().invoke(move || {
-                        this.toast("Failed to get initial launcher state", err);
-                    });
+            std::thread::spawn(move || {
+                match LauncherState::get(move |status| sender.send(status.to_string()).unwrap()) {
+                    Ok(state) => {
+                        this.set_state(state.clone());
+
+                        this.widgets.status_page.hide();
+                        this.widgets.launcher_content.show();
+
+                        send.send(Ok(state)).unwrap();
+                    },
+                    Err(err) => {
+                        send.send(Err(err.to_string())).unwrap();
+
+                        glib::MainContext::default().invoke(move || {
+                            this.toast("Failed to get initial launcher state", err);
+                        });
+                    }
                 }
-            }
+            });
         });
 
         Await::new(move || {

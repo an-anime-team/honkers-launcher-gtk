@@ -24,6 +24,7 @@ use crate::ui::components::progress_bar::*;
 use crate::lib;
 use crate::lib::wine_prefix::WinePrefix;
 use crate::lib::config;
+use crate::lib::media_foundation::install_media_foundation;
 
 /// This structure is used to describe widgets used in application
 /// 
@@ -372,14 +373,30 @@ impl App {
                                             config.game.dxvk.selected = Some(dxvk_version.name.clone());
     
                                             config::update_raw(config.clone()).unwrap();
-    
-                                            // Remove .first-run file
-                                            let launcher_dir = crate::lib::consts::launcher_dir().unwrap();
-    
-                                            std::fs::remove_file(format!("{}/.first-run", launcher_dir)).unwrap();
-    
-                                            // Show next page
-                                            this.update(Actions::DownloadComponentsContinue).unwrap();
+
+                                            // Apply media foundation patch
+                                            match install_media_foundation(
+                                                &config.game.wine.builds,
+                                                config.try_get_selected_wine_info().unwrap(),
+                                                &config.game.wine.prefix
+                                            ) {
+                                                Ok(output) => {
+                                                    println!("Media foundation patch applied:\n\n{}", String::from_utf8_lossy(&output.stdout));
+
+                                                    // Remove .first-run file
+                                                    let launcher_dir = crate::lib::consts::launcher_dir().unwrap();
+            
+                                                    std::fs::remove_file(format!("{}/.first-run", launcher_dir)).unwrap();
+            
+                                                    // Show next page
+                                                    this.update(Actions::DownloadComponentsContinue).unwrap();
+                                                },
+                                                Err(err) => {
+                                                    this.update(Actions::Toast(Rc::new((
+                                                        String::from("Failed to apply media foundation patch"), err.to_string()
+                                                    )))).unwrap();
+                                                }
+                                            }
                                         },
                                         Err(err) => {
                                             this.update(Actions::Toast(Rc::new((

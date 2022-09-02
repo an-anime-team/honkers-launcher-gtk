@@ -6,6 +6,7 @@ pub mod wine;
 pub mod wine_prefix;
 pub mod launcher;
 pub mod prettify_bytes;
+pub mod media_foundation;
 
 use std::process::{Command, Stdio};
 
