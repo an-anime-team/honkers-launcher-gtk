@@ -34,7 +34,7 @@ impl Default for Game {
         let launcher_dir = launcher_dir().expect("Failed to get launcher dir");
 
         Self {
-            path: format!("{launcher_dir}/game/drive_c/Program Files/Honkai Impact"),
+            path: format!("{launcher_dir}/game/drive_c/Program Files/BH3"),
             wine: Wine::default(),
             dxvk: Dxvk::default(),
             enhancements: Enhancements::default(),

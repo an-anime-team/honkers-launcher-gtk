@@ -113,10 +113,6 @@ impl AppWidgets {
             "Nikita Podvirnyy https://github.com/krypt0nn"
         ]);
 
-        result.about.add_credit_section("Logo", &[
-            "@nightany https://pinterest.com/pin/356206651788051017"
-        ]);
-
         result.about.add_credit_section("An Anime Team", &[
             "@Marie https://github.com/Mar0xy",
             "@lane https://github.com/laurinneff"
