@@ -12,7 +12,6 @@ use anime_game_core::prelude::*;
 
 mod welcome;
 mod dependencies;
-mod tos_warning;
 mod default_paths;
 mod download_components;
 mod finish;
@@ -39,7 +38,6 @@ pub struct AppWidgets {
 
     pub welcome: welcome::Page,
     pub dependencies: dependencies::Page,
-    pub tos_warning: tos_warning::Page,
     pub default_paths: default_paths::Page,
     pub download_components: download_components::Page,
     pub finish: finish::Page
@@ -56,7 +54,6 @@ impl AppWidgets {
 
             welcome: welcome::Page::new()?,
             dependencies: dependencies::Page::new()?,
-            tos_warning: tos_warning::Page::new()?,
             default_paths: default_paths::Page::new(get_object(&builder, "window")?)?,
             download_components: download_components::Page::new()?,
             finish: finish::Page::new()?
@@ -65,7 +62,6 @@ impl AppWidgets {
         // Add pages to carousel
         result.carousel.append(&result.welcome.page);
         result.carousel.append(&result.dependencies.page);
-        result.carousel.append(&result.tos_warning.page);
         result.carousel.append(&result.default_paths.page);
         result.carousel.append(&result.download_components.page);
         result.carousel.append(&result.finish.page);
@@ -89,7 +85,6 @@ pub enum Actions {
     WelcomeContinue,
     WelcomeAdvanced,
     DependenciesContinue,
-    TosWarningContinue,
     DefaultPathsContinue,
     DownloadComponents,
     DownloadComponentsContinue,
@@ -143,7 +138,6 @@ impl App {
     /// Add default events and values to the widgets
     fn init_events(self) -> Self {
         self.widgets.welcome.continue_button.connect_clicked(Actions::WelcomeContinue.into_fn(&self));
-        self.widgets.tos_warning.continue_button.connect_clicked(Actions::TosWarningContinue.into_fn(&self));
         self.widgets.default_paths.continue_button.connect_clicked(Actions::DefaultPathsContinue.into_fn(&self));
         self.widgets.dependencies.check_button.connect_clicked(Actions::DependenciesContinue.into_fn(&self));
 
@@ -151,7 +145,6 @@ impl App {
         self.widgets.download_components.download_button.connect_clicked(Actions::DownloadComponents.into_fn(&self));
 
         self.widgets.dependencies.exit_button.connect_clicked(Actions::Exit.into_fn(&self));
-        self.widgets.tos_warning.exit_button.connect_clicked(Actions::Exit.into_fn(&self));
         self.widgets.default_paths.exit_button.connect_clicked(Actions::Exit.into_fn(&self));
         self.widgets.download_components.exit_button.connect_clicked(Actions::Exit.into_fn(&self));
         self.widgets.finish.exit_button.connect_clicked(Actions::Exit.into_fn(&self));
@@ -189,7 +182,11 @@ impl App {
                         }
 
                         if installed {
-                            &this.widgets.tos_warning.page
+                            if this.advanced.get() {
+                                &this.widgets.default_paths.page
+                            } else {
+                                &this.widgets.download_components.page
+                            }
                         } else {
                             &this.widgets.dependencies.page
                         }
@@ -216,18 +213,8 @@ impl App {
                     }
 
                     if installed {
-                        this.widgets.carousel.scroll_to(&this.widgets.tos_warning.page, true);
+                        this.widgets.carousel.scroll_to(&this.widgets.download_components.page, true);
                     }
-                }
-
-                Actions::TosWarningContinue => {
-                    this.widgets.carousel.scroll_to({
-                        if this.advanced.get() {
-                            &this.widgets.default_paths.page
-                        } else {
-                            &this.widgets.download_components.page
-                        }
-                    }, true);
                 }
 
                 Actions::DefaultPathsContinue => {
