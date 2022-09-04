@@ -1,4 +1,4 @@
-# Beta 0.1.1
+# 1.0.0
 
 - updated core library
 - changed default game folder name to BH3
