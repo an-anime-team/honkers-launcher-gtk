@@ -464,9 +464,7 @@ impl App {
                                         None => this.toast("Failed to get selected wine version", Error::last_os_error())
                                     }
                                 }
-        
-                                LauncherState::VoiceUpdateAvailable(diff) |
-                                LauncherState::VoiceNotInstalled(diff) |
+
                                 LauncherState::GameUpdateAvailable(diff) |
                                 LauncherState::GameNotInstalled(diff) => {
                                     let (sender, receiver) = glib::MainContext::channel::<InstallerUpdate>(glib::PRIORITY_DEFAULT);
@@ -496,8 +494,6 @@ impl App {
                                                 this.update_state().then(move |result| {
                                                     if let Ok(state) = result {
                                                         match state {
-                                                            LauncherState::VoiceUpdateAvailable(_) |
-                                                            LauncherState::VoiceNotInstalled(_) |
                                                             LauncherState::GameUpdateAvailable(_) |
                                                             LauncherState::GameNotInstalled(_) => {
                                                                 this.update(Actions::PerformButtonEvent).unwrap();
@@ -528,8 +524,7 @@ impl App {
                                     });
                                 },
         
-                                LauncherState::GameOutdated(_) => (),
-                                LauncherState::VoiceOutdated(_) => ()
+                                LauncherState::GameOutdated(_) => ()
                             }
                         },
                         Err(err) => this.toast("Failed to load config", err)
@@ -750,17 +745,14 @@ impl App {
                 self.widgets.launch_game.set_label("Create prefix");
             }
 
-            LauncherState::GameUpdateAvailable(_) |
-            LauncherState::VoiceUpdateAvailable(_) => {
+            LauncherState::GameUpdateAvailable(_) => {
                 self.widgets.launch_game.set_label("Update");
             }
 
-            LauncherState::GameNotInstalled(_) |
-            LauncherState::VoiceNotInstalled(_) => {
+            LauncherState::GameNotInstalled(_) => {
                 self.widgets.launch_game.set_label("Download");
             }
 
-            LauncherState::VoiceOutdated(_) |
             LauncherState::GameOutdated(_) => {
                 self.widgets.launch_game.set_label("Update");
                 self.widgets.launch_game.set_tooltip_text(Some("Version is too outdated and can't be updated"));

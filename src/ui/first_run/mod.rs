@@ -367,11 +367,6 @@ impl App {
                                     match dxvk_version.apply(&config.game.dxvk.builds, &config.game.wine.prefix) {
                                         Ok(output) => {
                                             println!("Applied DXVK:\n\n{}", String::from_utf8_lossy(&output.stdout));
-    
-                                            // Update dxvk config
-                                            config.game.dxvk.selected = Some(dxvk_version.name.clone());
-    
-                                            config::update_raw(config.clone()).unwrap();
 
                                             // Apply media foundation patch
                                             match install_media_foundation(
