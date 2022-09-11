@@ -43,6 +43,7 @@ impl Default for GameEdition {
 pub struct Launcher {
     pub language: String,
     pub temp: Option<String>,
+    pub speed_limit: u64,
     pub repairer: Repairer
 }
 
@@ -51,6 +52,7 @@ impl Default for Launcher {
         Self {
             language: String::from("en-us"),
             temp: launcher_dir(),
+            speed_limit: 0,
             repairer: Repairer::default()
         }
     }
@@ -78,6 +80,11 @@ impl From<&JsonValue> for Launcher {
                     }
                 },
                 None => default.temp
+            },
+
+            speed_limit: match value.get("speed_limit") {
+                Some(value) => value.as_u64().unwrap_or(default.speed_limit),
+                None => default.speed_limit
             },
 
             repairer: match value.get("repairer") {

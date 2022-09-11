@@ -250,6 +250,10 @@ impl App {
                                     installer.temp_folder = temp_folder;
                                 }
 
+                                installer.downloader
+                                    .set_downloading_speed(config.launcher.speed_limit)
+                                    .expect("Failed to set downloading speed limit");
+
                                 // Download wine
                                 #[allow(unused_must_use)]
                                 installer.install(&config.game.wine.builds, move |state| {
@@ -304,6 +308,14 @@ impl App {
                                                     if let Some(temp_folder) = config.launcher.temp {
                                                         installer.temp_folder = temp_folder;
                                                     }
+
+                                                    installer.downloader
+                                                        .set_downloading_speed(config.launcher.speed_limit)
+                                                        .expect("Failed to set downloading speed limit");
+    
+                                                    installer.downloader
+                                                        .set_downloading_speed(config.launcher.speed_limit)
+                                                        .expect("Failed to set downloading speed limit");
     
                                                     // Download DXVK
                                                     #[allow(unused_must_use)]
@@ -345,7 +357,7 @@ impl App {
                             },
 
                             ProgressUpdateResult::Finished => {
-                                let mut config = config::get().unwrap();
+                                let config = config::get().unwrap();
 
                                 // Apply DXVK
                                 let this = this.clone();

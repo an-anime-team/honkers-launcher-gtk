@@ -360,16 +360,21 @@ impl App {
                 Actions::UpdateDxvkComboRow => {
                     let model = gtk::StringList::new(&[]);
 
-                    let list = dxvk::List::list_downloaded(config.game.dxvk.builds)
+                    let list = dxvk::List::list_downloaded(&config.game.dxvk.builds)
                         .expect("Failed to list downloaded DXVK versions");
 
                     let mut raw_list = Vec::new();
                     let mut selected = 0;
 
+                    let curr = match config.try_get_selected_dxvk_info() {
+                        Ok(Some(curr)) => Some(curr.name),
+                        _ => None
+                    };
+
                     for version in list {
                         model.append(&version.name);
 
-                        if let Some(curr) = &config.game.dxvk.selected {
+                        if let Some(curr) = &curr {
                             if &version.name == curr {
                                 selected = raw_list.len() as u32;
                             }
@@ -401,9 +406,16 @@ impl App {
 
                     if let Some(dxvk_versions) = &values.downloaded_dxvk_versions {
                         let version = dxvk_versions[*i].clone();
+                        let mut apply = true;
 
-                        if config.game.dxvk.selected != Some(version.name.clone()) {
-                            config.game.dxvk.selected = Some(version.name.clone());
+                        if let Ok(Some(curr)) = config.try_get_selected_dxvk_info() {
+                            if version == curr {
+                                apply = false;
+                            }
+                        }
+
+                        if apply {
+                            this.widgets.dxvk_selected.set_sensitive(false);
 
                             std::thread::spawn(clone!(@strong config, @strong this => move || {
                                 match version.apply(&config.game.dxvk.builds, &config.game.wine.prefix) {
@@ -414,6 +426,8 @@ impl App {
                                         )))).unwrap();
                                     }
                                 }
+
+                                this.widgets.dxvk_selected.set_sensitive(true);
                             }));
                         }
                     }
@@ -524,19 +538,29 @@ impl App {
         match game.try_get_diff()? {
             VersionDiff::Latest(version) => {
                 self.widgets.game_version.set_label(&version.to_string());
-            },
+            }
+
+            VersionDiff::Predownload { current, latest, .. } => {
+                self.widgets.game_version.set_label(&current.to_string());
+                self.widgets.game_version.set_css_classes(&["accent"]);
+
+                self.widgets.game_version.set_tooltip_text(Some(&format!("Game update pre-downloading available: {} -> {}", current, latest)));
+            }
+
             VersionDiff::Diff { current, latest, .. } => {
                 self.widgets.game_version.set_label(&current.to_string());
                 self.widgets.game_version.set_css_classes(&["warning"]);
 
                 self.widgets.game_version.set_tooltip_text(Some(&format!("Game update available: {} -> {}", current, latest)));
-            },
+            }
+
             VersionDiff::Outdated { current, latest } => {
                 self.widgets.game_version.set_label(&current.to_string());
                 self.widgets.game_version.set_css_classes(&["error"]);
 
                 self.widgets.game_version.set_tooltip_text(Some(&format!("Game is too outdated and can't be updated. Latest version: {latest}")));
-            },
+            }
+
             VersionDiff::NotInstalled { .. } => {
                 self.widgets.game_version.set_label("not installed");
                 self.widgets.game_version.set_css_classes(&[]);

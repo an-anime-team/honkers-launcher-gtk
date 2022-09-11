@@ -12,15 +12,6 @@ pub enum LauncherState {
     PrefixNotExists,
 
     // Always contains `VersionDiff::Diff`
-    VoiceUpdateAvailable(VersionDiff),
-
-    /// Always contains `VersionDiff::Outdated`
-    VoiceOutdated(VersionDiff),
-
-    /// Always contains `VersionDiff::NotInstalled`
-    VoiceNotInstalled(VersionDiff),
-
-    // Always contains `VersionDiff::Diff`
     GameUpdateAvailable(VersionDiff),
 
     /// Always contains `VersionDiff::Outdated`
@@ -57,7 +48,10 @@ impl LauncherState {
         let diff = game.try_get_diff()?;
 
         Ok(match diff {
-            VersionDiff::Latest(_) => Self::Launch,
+            // We don't check Predownload here because hon-kai
+            // seems to not have game pre-downloadings at all
+            VersionDiff::Latest(_) | VersionDiff::Predownload { .. } => Self::Launch,
+
             VersionDiff::Diff { .. } => Self::GameUpdateAvailable(diff),
             VersionDiff::Outdated { .. } => Self::GameOutdated(diff),
             VersionDiff::NotInstalled { .. } => Self::GameNotInstalled(diff)
